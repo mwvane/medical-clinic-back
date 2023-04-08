@@ -12,6 +12,7 @@ namespace medical_clinic.Models
         public DbSet<EmailConfirm> EmailConfirm { get; set; }
         public DbSet<DoctorViews> DoctorViews { get; set; }
         public DbSet<DoctorExperience> DoctorExperiences { get; set; }
+        public DbSet<Book> Books { get; set; }
 
     }
 }
