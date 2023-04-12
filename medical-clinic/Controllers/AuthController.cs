@@ -160,11 +160,11 @@ namespace medical_clinic.Controllers
             {
                 if (result.ValidDate < DateTime.Now)
                 {
-                    return new Result() { Errors = new List<string>() { "Code expired " } };
+                    return new Result() { Errors = new List<string>() { "კოდი ვადაგასულია" } };
                 }
                 return new Result() { Res = true };
             }
-            return new Result() { Errors = new List<string>() { "Code not found " } };
+            return new Result() { Errors = new List<string>() { "კოდი არასწორია" } };
 
         }
 
@@ -178,6 +178,7 @@ namespace medical_clinic.Controllers
                 new Claim(ClaimTypes.Role,user.Role),
                 new Claim("lastname",$"{user.Lastname}"),
                 new Claim("firstname",$"{user.Firstname}"),
+                new Claim("ID",$"{user.IdentityNumber}"),
                 new Claim(ClaimTypes.Email,$"{user.Email}"),
             }); ;
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
