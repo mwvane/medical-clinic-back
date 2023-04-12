@@ -34,7 +34,8 @@ namespace medical_clinic.Controllers
                                Role = user.Role,
                                Rating = doctor.Rating,
                                Views = doctor.Views,
-                               IsPinned = doctor.IsPinned
+                               IsPinned = doctor.IsPinned,
+                               Category = _context.Categories.Where(item => item.Id == doctor.CategoryId).FirstOrDefault(),
 
                            }).ToList();
             if (id == 0)

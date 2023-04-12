@@ -9,6 +9,8 @@ namespace medical_clinic.Models
         public int Id { get; set; }
         [Required]
         public int UserID { get; set; }
+        [Required]
+        public int CategoryId { get; set; }
         [AllowNull]
         public int? Views { get; set; }
         [AllowNull]
