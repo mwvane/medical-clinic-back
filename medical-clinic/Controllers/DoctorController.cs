@@ -35,6 +35,7 @@ namespace medical_clinic.Controllers
                                Rating = doctor.Rating,
                                Views = doctor.Views,
                                IsPinned = doctor.IsPinned,
+                               ImageUrl = user.ImageUrl,
                                Category = _context.Categories.Where(item => item.Id == doctor.CategoryId).FirstOrDefault(),
 
                            }).ToList();
