@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using medical_clinic.Models;
 
@@ -11,9 +12,11 @@ using medical_clinic.Models;
 namespace medical_clinic.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230415073141_Make_Nullable_pinDate")]
+    partial class Make_Nullable_pinDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,6 +78,12 @@ namespace medical_clinic.Migrations
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsPinned")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("PinDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("Rating")
                         .HasColumnType("int");
@@ -151,31 +160,6 @@ namespace medical_clinic.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EmailConfirm");
-                });
-
-            modelBuilder.Entity("medical_clinic.Models.Pin", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DoctorId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsPinned")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("PinDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Pin");
                 });
 
             modelBuilder.Entity("medical_clinic.Models.User", b =>

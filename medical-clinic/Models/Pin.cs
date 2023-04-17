@@ -3,18 +3,17 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace medical_clinic.Models
 {
-    public class Doctor
+    public class Pin
     {
         [Key]
         public int Id { get; set; }
         [Required]
-        public int UserID { get; set; }
+        public int UserId { get; set; }
         [Required]
-        public int CategoryId { get; set; }
+        public int DoctorId { get; set; }
+        [Required]
+        public Boolean IsPinned { get; set; }
         [AllowNull]
-        public int? Views { get; set; }
-        [AllowNull]
-        public int? Rating { get; set; }
-        
+        public DateTime? PinDate { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
@@ -13,6 +14,7 @@ namespace medical_clinic.Controllers
     public class DoctorController : ControllerBase
     {
         private readonly MyDbContext _context;
+
         public DoctorController(MyDbContext context)
         {
             _context = context;
@@ -21,6 +23,7 @@ namespace medical_clinic.Controllers
         [HttpGet("getDoctors")]
         public Result GetDoctors(int id = 0)
         {
+            Claim? claimId = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("id", StringComparison.InvariantCultureIgnoreCase));
             var doctors = (from user in _context.Users
                            join doctor in _context.Doctors
                            on user.Id equals doctor.UserID
@@ -34,14 +37,16 @@ namespace medical_clinic.Controllers
                                Role = user.Role,
                                Rating = doctor.Rating,
                                Views = doctor.Views,
-                               IsPinned = doctor.IsPinned,
                                ImageUrl = user.ImageUrl,
                                Category = _context.Categories.Where(item => item.Id == doctor.CategoryId).FirstOrDefault(),
+                               Pin = _context.Pin.Where(item => item.DoctorId == user.Id && item.UserId == Convert.ToInt32((claimId != null ? claimId.Value : 0))).FirstOrDefault(),
 
                            }).ToList();
+
             if (id == 0)
             {
-                return new Result() { Res = doctors };
+                var date = new DateTime();
+                return new Result() { Res = doctors.OrderByDescending(item => item.Pin != null ? item.Pin.PinDate : date) };
             }
             else
             {
@@ -82,6 +87,46 @@ namespace medical_clinic.Controllers
             }
             return new Result() { Errors = new List<string>() { "ავტორიზაცია საჭიროა" } };
 
+        }
+
+        [Authorize]
+        [HttpPost("pin")]
+        public Result Pin([FromBody] Pin pin)
+        {
+            Result error = new Result() { Errors = new List<string>() { "მსგავსი მომხმარებელი ვერ მოიძებნა" } };
+            if (pin.UserId > 0 && pin.DoctorId > 0)
+            {
+                var existedPin = _context.Pin.Where(item => item.UserId == pin.UserId && item.DoctorId == pin.DoctorId).FirstOrDefault();
+                if (existedPin != null)
+                {
+                    existedPin.IsPinned = pin.IsPinned;
+                    if (pin.IsPinned)
+                    {
+                        existedPin.PinDate = DateTime.Now;
+                        _context.Pin.Update(existedPin);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        _context.Pin.Remove(existedPin);
+                        _context.SaveChanges();
+                    }
+
+                    Claim? claimId = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("id", StringComparison.InvariantCultureIgnoreCase));
+                    var pinCount = _context.Pin.Where(item => item.UserId == Convert.ToInt32(claimId.Value)).ToList().Count;
+                    return new Result() { Res = pinCount == 0 ? 0 : pinCount };
+                }
+                else
+                {
+                    _context.Pin.Add(pin);
+                    _context.SaveChanges();
+                    return new Result() { Res = 0 };
+                }
+            }
+            else
+            {
+                return error;
+            }
         }
     }
 }

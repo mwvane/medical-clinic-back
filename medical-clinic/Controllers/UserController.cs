@@ -1,4 +1,5 @@
 ﻿using medical_clinic.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,6 +33,38 @@ namespace medical_clinic.Controllers
             {
                 return new Result() { Res = _context.Users.ToList() };
             }
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpGet("getUsersByRole")]
+        public Result GetUsersByRole(string role = "doctor")
+        {
+
+            var users = _context.Users.Where(item => item.Role == role).ToList();
+            if (users != null)
+            {
+                return new Result() { Res = users };
+            }
+            return new Result() { Errors = new List<string>() { "მომხმარებელი ვერ მოიძებმა" } };
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost("deleteUser")]
+        public Result DeleteUser([FromBody] int userId)
+        {
+            var user = _context.Users.Where(item => item.Id == userId).FirstOrDefault();
+            if (user != null)
+            {
+                Console.WriteLine("bla bla blaehvuev------------------------");
+                return new Result() { Res = true };
+            }
+            return new Result() { Errors = new List<string>() { "მსგავსი მომხმარებელი ვერ მოიძებნა!" } };
+        }
+
+        [HttpPost("editUser")]
+        public Result EditUser([FromBody] User user)
+        {
+            return new Result();
         }
     }
 }

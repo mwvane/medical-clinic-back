@@ -13,6 +13,7 @@ namespace medical_clinic.Models
         public DbSet<DoctorViews> DoctorViews { get; set; }
         public DbSet<DoctorExperience> DoctorExperiences { get; set; }
         public DbSet<Book> Books { get; set; }
+        public DbSet<Pin> Pin { get; set; }
 
     }
 }
