@@ -20,7 +20,7 @@ namespace medical_clinic.Models
         [Required]
         public string Role { get; set; } = "Client";
         [AllowNull]
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
         [AllowNull]
         public string? Token { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;

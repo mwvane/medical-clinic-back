@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace medical_clinic.Controllers
 {
@@ -23,6 +24,7 @@ namespace medical_clinic.Controllers
             {
                 var user = _context.Users.Where(item => item.Id == id).FirstOrDefault();
                 if (user != null)
+
                 {
                     return new Result() { Res = user };
                 }
@@ -55,7 +57,16 @@ namespace medical_clinic.Controllers
             var user = _context.Users.Where(item => item.Id == userId).FirstOrDefault();
             if (user != null)
             {
-                Console.WriteLine("bla bla blaehvuev------------------------");
+                if(user.Role == "doctor")
+                {
+                    var doctor = _context.Doctors.Where(item => item.UserID == user.Id).FirstOrDefault();
+                    if(doctor != null)
+                    {
+                        _context.Doctors.Remove(doctor);
+                    }
+                }
+                _context.Users.Remove(user);
+                //_context.SaveChanges();
                 return new Result() { Res = true };
             }
             return new Result() { Errors = new List<string>() { "მსგავსი მომხმარებელი ვერ მოიძებნა!" } };
@@ -64,7 +75,32 @@ namespace medical_clinic.Controllers
         [HttpPost("editUser")]
         public Result EditUser([FromBody] User user)
         {
-            return new Result();
+            List<string> errors = validationHelper.Validateuser(user);
+            if (errors.Count == 0)
+            {
+                var selectedUser = _context.Users.Where(item => item.Id == user.Id).FirstOrDefault();
+
+                if (selectedUser != null)
+                {
+                    selectedUser.IdentityNumber = user.IdentityNumber;
+                    selectedUser.Role = user.Role;
+                    selectedUser.Firstname = user.Firstname;
+                    selectedUser.Lastname = user.Lastname;
+                    selectedUser.ImageUrl = user.ImageUrl;
+                    selectedUser.Password = user.Password;
+                    _context.Users.Update(selectedUser);
+                    _context.SaveChanges();
+                    return new Result() { Res = true };
+
+                }
+                return new Result() { Errors = new List<string>() { "მონაცემები არასწორია" } };
+
+            }
+            else
+            {
+                return new Result() { Errors = errors };
+            }
         }
     }
 }
+

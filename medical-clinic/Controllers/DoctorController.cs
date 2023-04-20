@@ -59,6 +59,7 @@ namespace medical_clinic.Controllers
             }
         }
 
+
         [Authorize]
         [HttpPost("increaseDoctorViews")]
         public Result IncreaseDoctorViews([FromBody] int docotorId)
