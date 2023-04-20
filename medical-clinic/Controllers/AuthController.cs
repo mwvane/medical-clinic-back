@@ -7,7 +7,6 @@ using MimeKit;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace medical_clinic.Controllers
 {
@@ -26,6 +25,7 @@ namespace medical_clinic.Controllers
 
             if (user != null)
             {
+                List<string> errors = validationHelper.Validateuser(user);
                 user.CreatedAt = DateTime.Now;
                 bool usernameAlreadyExists = false;
 
@@ -34,7 +34,6 @@ namespace medical_clinic.Controllers
                 if (!usernameAlreadyExists)
                 {
 
-                    List<string> errors = Validateuser(user);
                     if (errors.Count == 0)
                     {
                         _context.Add(user);
@@ -50,45 +49,11 @@ namespace medical_clinic.Controllers
                     return new Result() { Errors = errors };
                 }
                 return new Result() { Errors = new List<string>() { "მომხმარებლის სახელი უკვე არსებობს!" } };
+
             }
             return new Result() { Errors = new List<string>() { "მონაცემები არასწორია" } };
         }
 
-        private List<string> Validateuser(User user)
-        {
-            List<string> errors = new List<string>();
-            if (user.Firstname.Length < 5)
-            {
-                errors.Add("სახელი უნდა შედგებოდეს არა ნაკლებ 5 სიმბოლოსგან");
-            }
-            if (user.Password.Length < 8)
-            {
-                errors.Add("პაროლი უნდა შედგებოდეს არა ნაკლებ 8 სიმბოლოსგან");
-            }
-            var capitalLetters = Regex.IsMatch(user.Password, "[A-Z]");
-            if (!capitalLetters)
-            {
-                errors.Add("პაროლი უნდა შეიცავდეს მინიმუმ ერთ კაპიტალურ სიმბოლოს");
-            }
-
-            var isDigit = Regex.IsMatch(user.Password, "[0-9]");
-            if (!capitalLetters)
-            {
-                errors.Add("პაროლი უნდა შეიცავდეს მინიმუმ ერთ ციფრს");
-            }
-
-            if (IsEmailValid(user.Email))
-            {
-                errors.Add("მეილის ფორმატია");
-
-            }
-            return errors;
-        }
-
-        private bool IsEmailValid(string email)
-        {
-            return Regex.IsMatch(email, "^[a-zA-Z0-9_.+-]+@[email]+\\.[a-zA-Z0-9-.]+$", RegexOptions.IgnoreCase) == true;
-        }
 
         [HttpPost("login")]
         public Result login([FromBody] Dictionary<string, string> payload)

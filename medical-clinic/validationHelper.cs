@@ -1,4 +1,5 @@
 ﻿using medical_clinic.Models;
+using System.Text.RegularExpressions;
 
 namespace medical_clinic
 {
@@ -21,6 +22,42 @@ namespace medical_clinic
                 result.Errors.Add("მითითებული დრო დაკავებულია!");
             }
             return result;
+        }
+
+        public static  List<string> Validateuser(User user)
+        {
+            List<string> errors = new List<string>();
+            if (user.Firstname.Length < 5)
+            {
+                errors.Add("სახელი უნდა შედგებოდეს არა ნაკლებ 5 სიმბოლოსგან");
+            }
+            if (user.Password.Length < 8)
+            {
+                errors.Add("პაროლი უნდა შედგებოდეს არა ნაკლებ 8 სიმბოლოსგან");
+            }
+            var capitalLetters = Regex.IsMatch(user.Password, "[A-Z]");
+            if (!capitalLetters)
+            {
+                errors.Add("პაროლი უნდა შეიცავდეს მინიმუმ ერთ კაპიტალურ სიმბოლოს");
+            }
+
+            var isDigit = Regex.IsMatch(user.Password, "[0-9]");
+            if (!capitalLetters)
+            {
+                errors.Add("პაროლი უნდა შეიცავდეს მინიმუმ ერთ ციფრს");
+            }
+
+            if (IsEmailValid(user.Email))
+            {
+                errors.Add("მეილის ფორმატია");
+
+            }
+            return errors;
+        }
+
+        public static  bool IsEmailValid(string email)
+        {
+            return Regex.IsMatch(email, "^[a-zA-Z0-9_.+-]+@[email]+\\.[a-zA-Z0-9-.]+$", RegexOptions.IgnoreCase) == true;
         }
     }
 }
