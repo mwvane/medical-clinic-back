@@ -23,6 +23,8 @@ namespace medical_clinic.Models
         public string? ImageUrl { get; set; }
         [AllowNull]
         public string? Token { get; set; }
+        [AllowNull]
+        public bool? TwoFactory { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using medical_clinic.Models;
 using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace medical_clinic
 {
@@ -24,28 +25,20 @@ namespace medical_clinic
             return result;
         }
 
-        public static  List<string> Validateuser(User user)
+        public static List<string> Validateuser(User user)
         {
             List<string> errors = new List<string>();
+            List<string> passwordErrors = isPasswordValid(user.Password);
+            if (passwordErrors.Count > 0)
+            {
+                errors = passwordErrors;
+            }
+
             if (user.Firstname.Length < 5)
             {
                 errors.Add("სახელი უნდა შედგებოდეს არა ნაკლებ 5 სიმბოლოსგან");
             }
-            if (user.Password.Length < 8)
-            {
-                errors.Add("პაროლი უნდა შედგებოდეს არა ნაკლებ 8 სიმბოლოსგან");
-            }
-            var capitalLetters = Regex.IsMatch(user.Password, "[A-Z]");
-            if (!capitalLetters)
-            {
-                errors.Add("პაროლი უნდა შეიცავდეს მინიმუმ ერთ კაპიტალურ სიმბოლოს");
-            }
 
-            var isDigit = Regex.IsMatch(user.Password, "[0-9]");
-            if (!capitalLetters)
-            {
-                errors.Add("პაროლი უნდა შეიცავდეს მინიმუმ ერთ ციფრს");
-            }
 
             if (IsEmailValid(user.Email))
             {
@@ -55,9 +48,29 @@ namespace medical_clinic
             return errors;
         }
 
-        public static  bool IsEmailValid(string email)
+        public static bool IsEmailValid(string email)
         {
             return Regex.IsMatch(email, "^[a-zA-Z0-9_.+-]+@[email]+\\.[a-zA-Z0-9-.]+$", RegexOptions.IgnoreCase) == true;
+        }
+        public static List<string> isPasswordValid(string password)
+        {
+            List<string> errors = new List<string>();
+            if (password.Length < 8)
+            {
+                errors.Add("პაროლი უნდა შედგებოდეს არა ნაკლებ 8 სიმბოლოსგან");
+            }
+            var capitalLetters = Regex.IsMatch(password, "[A-Z]");
+            if (!capitalLetters)
+            {
+                errors.Add("პაროლი უნდა შეიცავდეს მინიმუმ ერთ კაპიტალურ სიმბოლოს");
+            }
+
+            var isDigit = Regex.IsMatch(password, "[0-9]");
+            if (!capitalLetters)
+            {
+                errors.Add("პაროლი უნდა შეიცავდეს მინიმუმ ერთ ციფრს");
+            }
+            return errors;
         }
     }
 }

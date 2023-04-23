@@ -1,5 +1,6 @@
 ﻿using MailKit.Net.Smtp;
 using medical_clinic.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -84,18 +85,18 @@ namespace medical_clinic.Controllers
         }
 
         [HttpPost("sendMail")]
-        public void SendMail([FromBody] Mail mail)
+        public Boolean SendMail([FromBody] Mail mail)
         {
-            Console.WriteLine(mail.EmailTo[0]);
+            var mailTo = mail.EmailTo[0];
             var code = Guid.NewGuid().ToString("N").Substring(0, 8);
             var email = new MimeMessage();
             email.From.Add(MailboxAddress.Parse(Constants.EMAIL_FROM));
-            email.To.Add(MailboxAddress.Parse(Constants.EMAIL_FROM));
+            email.To.Add(MailboxAddress.Parse(mailTo));
             email.Subject = "test subject";
             email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = "Your code is : " + code };
 
             using var smtp = new SmtpClient();
-            smtp.Connect("smtp.ethereal.email", 587, MailKit.Security.SecureSocketOptions.StartTls);
+            smtp.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
             smtp.Authenticate(Constants.EMAIL_FROM, Constants.MAIL_PASSWORD);
             smtp.Send(email);
             smtp.Disconnect(true);
@@ -112,6 +113,7 @@ namespace medical_clinic.Controllers
                 _context.EmailConfirm.Add(new EmailConfirm { Code = code, Email = mail.EmailTo[0], ValidDate = DateTime.Now.AddMinutes(30) });
             }
             _context.SaveChanges();
+            return true;
 
         }
 
@@ -133,6 +135,68 @@ namespace medical_clinic.Controllers
 
         }
 
+        [HttpPost("changePassword")]
+        public Result ChangePassword([FromBody] Dictionary<string, string> payload)
+        {
+            var email = payload["email"];
+            var password = payload["password"];
+            var confirmPassword = payload["confirmPassword"];
+            var passwordErrors = validationHelper.isPasswordValid(password);
+            if (password != confirmPassword)
+            {
+                return new Result() { Errors = new List<string>() { "პაროლი არ ემთხვევა" } };
+            }
+            if (passwordErrors.Count > 0)
+            {
+                return new Result() { Errors = new List<string>() { "პაროლი არ ემთხვევა" } };
+
+            }
+            else
+            {
+                var user = _context.Users.FirstOrDefault(item => item.Email == email);
+                if (user != null)
+                {
+                    user.Password = password;
+                    _context.SaveChanges();
+                    return new Result() { Res = true };
+                }
+                return new Result() { Errors = new List<string>() { "მომხმარებელი ვერ მოიძებნა" } };
+
+            }
+        }
+
+        [Authorize]
+        [HttpPost("twoFactory")]
+        public Result Twofactory([FromBody] bool status)
+        {
+            Claim? claimId = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("id", StringComparison.InvariantCultureIgnoreCase));
+            if(claimId!= null)
+            {
+                var user = _context.Users.FirstOrDefault(item => item.Id == Convert.ToInt32(claimId.Value));
+                if(user != null)
+                {
+                    user.TwoFactory = status;
+                    _context.Users.Update(user);
+                    _context.SaveChanges();
+                    user.Token = CreateJwt(user);
+                    return new Result()
+                    {
+                        Res = new JwtAuthResponse
+                        {
+                            Token = user.Token,
+                        }
+                    };
+                }
+                else
+                {
+                    return new Result() { Errors = new List<string>() {"მომხმარებელი ვერ მოიძებნა"} };
+                }
+
+            }
+            return new Result() { Errors = new List<string>() { "მომხმარებელი ვერ მოიძებნა" } };
+
+        }
+
         private string CreateJwt(User user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -140,6 +204,7 @@ namespace medical_clinic.Controllers
             var identity = new ClaimsIdentity(new Claim[]
             {
                 new Claim("id", user.Id.ToString()),
+                new Claim("twoFactory", user.TwoFactory == null ? "False": user.TwoFactory.ToString()),
                 new Claim(ClaimTypes.Role,user.Role),
                 new Claim("lastname",$"{user.Lastname}"),
                 new Claim("firstname",$"{user.Firstname}"),

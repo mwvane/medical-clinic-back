@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Data;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
@@ -57,6 +58,37 @@ namespace medical_clinic.Controllers
                 }
                 return new Result() { Errors = new List<string>() { "ექიმი ვერ მოიძებნა" } };
             }
+        }
+
+
+        [HttpPost("search")]
+        public Result Search([FromBody] Dictionary<string, string> payload)
+        {
+            string name = payload["doctorName"];
+            string categoryName = payload["category"];
+            var doctors = (from user in _context.Users
+                           join doctor in _context.Doctors
+                           on user.Id equals doctor.UserID
+                           join category in _context.Categories
+                           on doctor.CategoryId equals category.Id
+                           select new
+                           {
+                               Id = user.Id,
+                               Firstname = user.Firstname,
+                               Lastname = user.Lastname,
+                               IdentityNumber = user.IdentityNumber,
+                               Email = user.Email,
+                               Role = user.Role,
+                               Rating = doctor.Rating,
+                               Views = doctor.Views,
+                               ImageUrl = user.ImageUrl,
+                               Category = _context.Categories.Where(item => item.Id == doctor.CategoryId).FirstOrDefault(),
+                           }).ToList();
+
+            var filteredDocotors = doctors.Where(item => item.Firstname.ToLower().Contains(name.ToLower()) && item.Category.Name.Contains(categoryName)).ToList();
+
+
+            return new Result() { Res = filteredDocotors };
         }
 
 
