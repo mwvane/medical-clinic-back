@@ -58,6 +58,7 @@ namespace medical_clinic
             app.UseAuthorization();
             app.UseCors("corspolicy");
             app.MapControllers();
+
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(

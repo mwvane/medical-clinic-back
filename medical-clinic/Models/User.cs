@@ -22,6 +22,8 @@ namespace medical_clinic.Models
         [AllowNull]
         public string? ImageUrl { get; set; }
         [AllowNull]
+        public string? CV { get; set; }
+        [AllowNull]
         public string? Token { get; set; }
         [AllowNull]
         public bool? TwoFactory { get; set; } = false;
