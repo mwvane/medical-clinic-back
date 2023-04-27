@@ -7,6 +7,8 @@
         public static string DEFAULT_SERVER = "https://localhost:7137/";
         public static string EMAIL_FROM = "bzishvili57@gmail.com";
         public static string MAIL_PASSWORD = "mnatmygohuvbhvli";
+        public static string IMAGES_FOLDER_NAME = "Images";
+        public static string DOCUMENTS_FOLDER_NAME = "Documents";
 
         //minuts
         public static int emailCodeValidDate = 30;

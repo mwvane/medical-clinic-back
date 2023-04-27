@@ -66,7 +66,7 @@ namespace medical_clinic.Controllers
                     }
                 }
                 _context.Users.Remove(user);
-                //_context.SaveChanges();
+                _context.SaveChanges();
                 return new Result() { Res = true };
             }
             return new Result() { Errors = new List<string>() { "მსგავსი მომხმარებელი ვერ მოიძებნა!" } };
@@ -86,8 +86,25 @@ namespace medical_clinic.Controllers
                     selectedUser.Role = user.Role;
                     selectedUser.Firstname = user.Firstname;
                     selectedUser.Lastname = user.Lastname;
-                    selectedUser.ImageUrl = user.ImageUrl;
                     selectedUser.Password = user.Password;
+                    if(user.Role == "doctor")
+                    {
+                        var doctor = _context.Doctors.FirstOrDefault(item => item.UserID == user.Id);
+                        if (doctor != null)
+                        {
+                            if(user.CategoryId != null)
+                            {
+                                doctor.CategoryId = user.CategoryId;
+                                _context.Doctors.Update(doctor);
+                            }
+                            else
+                            {
+                                _context.Doctors.Add(new Doctor() { Rating = 0, UserID = user.Id, Views = 0, CategoryId = user.CategoryId });
+                                _context.SaveChanges();
+                            }
+
+                        }
+                    }
                     _context.Users.Update(selectedUser);
                     _context.SaveChanges();
                     return new Result() { Res = true };

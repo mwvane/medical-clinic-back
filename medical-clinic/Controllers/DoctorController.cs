@@ -39,6 +39,7 @@ namespace medical_clinic.Controllers
                                Rating = doctor.Rating,
                                Views = doctor.Views,
                                ImageUrl = user.ImageUrl.Length > 0 ? Constants.DEFAULT_SERVER + user.ImageUrl : null,
+                               cv = user.CV.Length > 0 ? Constants.DEFAULT_SERVER + user.CV : null,
                                Category = _context.Categories.Where(item => item.Id == doctor.CategoryId).FirstOrDefault(),
                                Pin = _context.Pin.Where(item => item.DoctorId == user.Id && item.UserId == Convert.ToInt32((claimId != null ? claimId.Value : 0))).FirstOrDefault(),
 
@@ -82,6 +83,7 @@ namespace medical_clinic.Controllers
                                Rating = doctor.Rating,
                                Views = doctor.Views,
                                ImageUrl = user.ImageUrl.Length > 0 ? Constants.DEFAULT_SERVER + user.ImageUrl : null,
+                               cv = user.CV.Length > 0 ? Constants.DEFAULT_SERVER + user.CV : null,
                                Category = _context.Categories.Where(item => item.Id == doctor.CategoryId).FirstOrDefault(),
                            }).ToList();
 

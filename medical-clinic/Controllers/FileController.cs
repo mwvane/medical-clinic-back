@@ -18,27 +18,44 @@ namespace medical_clinic.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpPost("uploadImage"), DisableRequestSizeLimit]
-        public string? UploadProductImage([FromForm] UploadFile file)
+        public Result UploadProductImage([FromForm] UploadFile file)
+        {
+            string? url = SaveFile(file, Constants.IMAGES_FOLDER_NAME);
+            if (url != null)
+            {
+                return new Result() { Res = url };
+            }
+            return new Result() { Errors = new List<string>() { "file not saved" } };
+        }
+
+        private string? SaveFile(UploadFile file, string path)
         {
             try
             {
-                var foldername = Path.Combine("Resources", "Images");
-                var pathTosave = Path.Combine(Directory.GetCurrentDirectory(), foldername);
-                string imageUrl = "";
+                var foldername = Path.Combine("Resources", path);
+                var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), foldername);
+                string? url = null;
                 if (file.File.Length > 0)
                 {
-                    var fileName = ContentDispositionHeaderValue.Parse(file.File.ContentDisposition).FileName.Trim().ToString();
-                    var fullPath = Path.Combine(pathTosave, fileName);
+                    var fileName = DateTime.Now.ToBinary() + ContentDispositionHeaderValue.Parse(file.File.ContentDisposition).FileName.Trim().ToString();
+                    var fullPath = Path.Combine(pathToSave, fileName);
                     var dbPath = Path.Combine(foldername, fileName);
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
                         file.File.CopyTo(stream);
-                        imageUrl = fullPath;
+                        url = fullPath;
                     }
                     var user = _context.Users.FirstOrDefault(item => item.Id == file.UserId);
                     if (user != null)
                     {
-                        user.ImageUrl = dbPath;
+                        if(path == Constants.IMAGES_FOLDER_NAME)
+                        {
+                            user.ImageUrl = dbPath;
+                        }
+                        else
+                        {
+                            user.CV = dbPath;
+                        }
                         _context.Users.Update(user);
                         _context.SaveChanges();
                     }
@@ -46,7 +63,7 @@ namespace medical_clinic.Controllers
                 }
                 _context.SaveChanges();
 
-                return imageUrl;
+                return url;
             }
             catch
             {
@@ -54,41 +71,20 @@ namespace medical_clinic.Controllers
             }
         }
 
-        //    [Authorize]
-        //    [HttpPost("uploadDocument"), DisableRequestSizeLimit]
 
-        //    public List<string> UploadProductDocument([FromForm] UploadFile files)
-        //    {
-        //        try
-        //        {
-        //            var foldername = Path.Combine("Resources", "Documents");
-        //            var pathTosave = Path.Combine(Directory.GetCurrentDirectory(), foldername);
-        //            List<string> documentUrls = new List<string>();
-        //            foreach (var item in files.files)
-        //            {
-        //                if (item.Length > 0)
-        //                {
-        //                    var fileName = ContentDispositionHeaderValue.Parse(item.ContentDisposition).FileName.Trim().ToString();
-        //                    var fullPath = Path.Combine(pathTosave, fileName);
-        //                    var dbPath = Path.Combine(foldername, fileName);
-        //                    using (var stream = new FileStream(fullPath, FileMode.Create))
-        //                    {
-        //                        item.CopyTo(stream);
-        //                        documentUrls.Add(fullPath);
-        //                    }
-        //                    _context.ProductDocuments.Add(new ProductDocument() { ProductId = files.productId, DocumentUrl = dbPath });
 
-        //                }
-        //            }
-        //            _context.SaveChanges();
+        [Authorize]
+        [HttpPost("uploadDocument"), DisableRequestSizeLimit]
 
-        //            return documentUrls;
-        //        }
-        //        catch
-        //        {
-        //            return null;
-        //        }
-        //    }
+        public Result UploadProductDocument([FromForm] UploadFile file)
+        {
+            string? url = SaveFile(file, Constants.DOCUMENTS_FOLDER_NAME);
+            if(url != null)
+            {
+                return new Result() { Res = url };
+            }
+            return new Result() { Errors = new List<string>() { "file not saved" } };
+        }
 
     }
 }

@@ -20,6 +20,7 @@ namespace medical_clinic.Controllers
         {
             _context = context;
         }
+
         [HttpPost("register")]
         public Result Register([FromBody] User user)
         {
@@ -42,7 +43,7 @@ namespace medical_clinic.Controllers
 
                         if (user.Role == "doctor")
                         {
-                            _context.Doctors.Add(new Doctor { UserID = user.Id, Rating = 0, Views = 0 });
+                            _context.Doctors.Add(new Doctor { UserID = user.Id, Rating = 0, Views = 0, CategoryId = user.CategoryId});
                             _context.SaveChanges();
                         }
                         return new Result() { Res = user };

@@ -18,13 +18,15 @@ namespace medical_clinic.Models
         [Required]
         public string Password { get; set; }
         [Required]
-        public string Role { get; set; } = "Client";
+        public string Role { get; set; } = "client";
         [AllowNull]
         public string? ImageUrl { get; set; }
         [AllowNull]
         public string? CV { get; set; }
         [AllowNull]
         public string? Token { get; set; }
+        [AllowNull]
+        public int? CategoryId { get; set; }
         [AllowNull]
         public bool? TwoFactory { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
