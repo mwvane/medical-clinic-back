@@ -73,7 +73,7 @@ namespace medical_clinic.Controllers
 
 
 
-        [Authorize]
+        [Authorize(Roles ="admin")]
         [HttpPost("uploadDocument"), DisableRequestSizeLimit]
 
         public Result UploadProductDocument([FromForm] UploadFile file)

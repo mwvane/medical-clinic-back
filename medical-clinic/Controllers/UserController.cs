@@ -67,9 +67,23 @@ namespace medical_clinic.Controllers
                 }
                 _context.Users.Remove(user);
                 _context.SaveChanges();
+                DeleteUserBooks(userId);
                 return new Result() { Res = true };
             }
             return new Result() { Errors = new List<string>() { "მსგავსი მომხმარებელი ვერ მოიძებნა!" } };
+        }
+
+        private void DeleteUserBooks(int userId)
+        {
+            var books = _context.Books.Where(book => book.UserId == userId).ToList();
+            if(books != null)
+            {
+                foreach (var item in books)
+                {
+                    _context.Remove(item);
+                }
+                _context.SaveChanges();
+            }
         }
 
         [HttpPost("editUser")]
